@@ -26,27 +26,51 @@ where hh, mm, ss are integers (represented by strings) with each 2 digits.
 Remarks:
 if a result in seconds is ab.xy... it will be given truncated as ab.
 if the given string is "" you will return ""
+
+
+========================================================================================================================
+I actually like my solution better than the ones that were submitted for this one, which is great.
+========================================================================================================================
+
 */
 
 package java_folder;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.regex.Pattern;
 
 public class Four {
     
     public static String stat(String strg) {
-		ArrayList<Integer> list = new ArrayList<Integer>();
+        // Sanity check
+        if (strg == "") return "";
+        
+        // Store the values converted into seconds into a list
+        ArrayList<Integer> list = new ArrayList<Integer>();
         for (String s: strg.split(",")) {
-            System.out.println(s);
-            String[] runnerStat = s.split("|");
-            
-            list.add((Integer.valueOf(runnerStat[0]) * 60 * 60) + (Integer.valueOf(runnerStat[1]) * 60) + (Integer.valueOf(runnerStat[2])));
+            String[] runnerStat = s.strip().split(Pattern.quote("|")); // this should give 3 values which are the H, M, S 
+            list.add((Integer.valueOf(runnerStat[0]) * 3600) + (Integer.valueOf(runnerStat[1]) * 60) + (Integer.valueOf(runnerStat[2])));
         }
-        System.out.println(list.toString());
-        return "";
-	}
+        // quickly sort the list for median value later
+        Collections.sort(list);
+        
+        // now run the stats on the values that we have calculated
+        long range = Collections.max(list) - Collections.min(list);
+        long mean = list.stream().mapToInt(Integer::intValue).sum() / list.size();
 
+        // This line will either take the middle value (if the size of the list is odd), or take the average of the two middle values (if the list size is even)
+        long median = list.size() % 2 == 0 ? ((list.get(list.size() / 2) + list.get((list.size() / 2) - 1)) / 2)  : list.get(list.size() / 2);
+        
+        return String.format("Range: %s Average: %s Median: %s", longToStatline(range), longToStatline(mean), longToStatline(median));
+    }
+    
+    public static String longToStatline(long l) {       
+        return String.format("%02d|%02d|%02d", l / 3600, l % 3600 / 60, l % 3600 % 60);
+    }
+    
     public static void main(String[] args) {
         System.out.println(stat("01|15|59, 1|47|16, 01|17|20, 1|32|34, 2|17|17"));
+        System.out.println(stat("02|15|59, 2|47|16, 02|17|20, 2|32|34, 2|32|34, 2|17|17"));
     }
 }
