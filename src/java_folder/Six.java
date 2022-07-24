@@ -22,14 +22,34 @@ revrot("563000655734469485", 4) --> "0365065073456944"
 Example of a string rotated to the left by one position:
 s = "123456" gives "234561".
 
-=======================================================================
-<Best solution goes here> 
+=======================================================================\
+
+This is just a bit more clever than what I am doing, but honestly mine isn't that far off
+
+ public static String revRot(String nums, int sz) {
+        StringBuffer groups = new StringBuffer();
+        for (int i = 0, len = nums.length(); i + sz <= len && sz > 0; i += sz) {
+            String group = nums.substring(i, i + sz);
+            groups.append(isDivisible(group) ? new StringBuffer(group).reverse() : group.substring(1) + group.charAt(0));
+        }
+        return groups.toString();  
+    }
+    
+    public static boolean isDivisible(String group) {
+        int sum = 0;
+        for (char num : group.toCharArray()) {
+            sum += Character.getNumericValue(num);
+        }
+        return sum % 2 == 0;
+    } 
 =======================================================================
 */
 
 package java_folder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 public class Six {
     public static String revRot(String strng, int sz) {
@@ -37,11 +57,32 @@ public class Six {
         if (sz <= 0) return "";
         if (sz > strng.length()) return "";
         
-        // Cut the string into chunks
-        String[] chunks = strng.split("");
+        // Create a list to hold all of the chunks we are going to work with
+        ArrayList<String> chunks = new ArrayList<>();
+        for (int i = 0; i < strng.length(); i += sz) {
+            // check if we are out of bounds or not
+            if (i >= strng.length() || i + sz >= strng.length()) {
+                break;
+            }
+            chunks.add(strng.substring(i, i + sz));
+        }
         
-
-        return "0";
+        // Check the sum of the cubes of it's digits
+        for (int i = 0; i < chunks.size(); i++) {
+            int sum = 0;
+            for (char s: chunks.get(i).toCharArray()) {
+                sum += Math.pow(Integer.valueOf(s), 3); 
+            }
+            if (sum % 2 == 0) {
+                chunks.set(i, new StringBuilder(chunks.get(i)).reverse().toString()); 
+            } else {
+                ArrayList<String> temp = new ArrayList(Arrays.asList(chunks.get(i).split("")));
+                Collections.rotate(temp, -1);
+                chunks.set(i, String.join("", temp));
+            }
+        }
+        
+        return String.join("", String.join("", chunks));
     }
     
     public static void main(String[] args) {
